@@ -23,6 +23,17 @@ import logging
 from scapy.all import *
 
 
+
+# 配置日志文件和日志级别
+logging.basicConfig(
+    filename='dns_log.txt',
+    level=logging.DEBUG,
+    format='%(asctime)s:%(funcName)15s:%(lineno)5s%(levelname)8s:%(name)10s:%(message)s',
+    datefmt='%Y/%m/%d %I:%M:%S'
+)
+
+logger = logging.getLogger('dns_log')
+
 def get_ip(ifname):
     local_ip = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     return socket.inet_ntoa(fcntl.ioctl(local_ip.fileno(), 0x8915, struct.pack('256s', bytes(ifname[:15], 'utf-8')))[20:24])
@@ -46,6 +57,7 @@ def make_random(start=0, end=65535):
     res = []
     for i in range(100):
         if i > 65535:
+            logger.error("make_random err:{}".format(i))
             raise ("i:{} > 65535".format(i))
         res.append(random.randint(start, end))
     return res
@@ -59,22 +71,22 @@ def make_random(start=0, end=65535):
 
 
 def make_dns_query(
-                   qr_ele=0,
-                   opcode_ele=0,
-                   tc_ele=0,
-                   rd_ele=0,
-                   qd_ele=1,
-                   an_ele=0,
-                   ns_ele=0,
-                   ar_ele=0,
-                   qclass_ele=1,
-                   ar_type_ele=41,
-                   ar_ttl_ele=60,
-                   ar_rclass_ele=512,
-                   ar_rdlen_ele=0
-                   ):
+    qr_ele=0,
+    opcode_ele=0,
+    tc_ele=0,
+    rd_ele=0,
+    qd_ele=1,
+    an_ele=0,
+    ns_ele=0,
+    ar_ele=0,
+    qclass_ele=1,
+    ar_type_ele=41,
+    ar_ttl_ele=60,
+    ar_rclass_ele=512,
+    ar_rdlen_ele=0
+):
 
-
+    logger.debug("make_dns_query:{}".format((qr_ele, opcode_ele, tc_ele, rd_ele, qd_ele, an_ele, ns_ele, ar_ele, qclass_ele, ar_type_ele, ar_ttl_ele, ar_rclass_ele, ar_rdlen_ele)))
     dns_query = DNS(id=0, qr=qr_ele, opcode=opcode_ele, tc=tc_ele, rd=rd_ele, qdcount=qd_ele, ancount=an_ele,
                     nscount=ns_ele, arcount=ar_ele)
     qtype_list = list(range(0, 255))
@@ -95,7 +107,8 @@ def check(*index_list):
         key = "x{}".format(index)
         xmax = xmax_map.get(key, -1)
         if x > xmax:
-            logging.info("{} index out of range, you input {}, max value is {}".format(key, x, xmax))
+            logging.info(
+                "{} index out of range, you input {}, max value is {}".format(key, x, xmax))
             return False
     return True
 
@@ -150,34 +163,39 @@ ar_type_list = [0, 1, 30000, 65535] + make_random()
 ar_ttl_list = [0, 1, 0xFFFFFFFF] + make_random(0, 0xFFFFFFFF)
 ar_rclass_list = [0, 1500, 4096, 65535] + make_random()
 ar_rdlen_list = [0, 31900, 65535] + make_random()
+logger.info("ar_type_list:{}".format(ar_type_list))
+logger.info("ar_ttl_list:{}".format(ar_ttl_list))
+logger.info("ar_rclass_list:{}".format(ar_rclass_list))
+logger.info("ar_rdlen_list:{}".format(ar_rdlen_list))
 
 ip = IP(dst=dns_server, src=client_server)
 udp = UDP(sport=RandShort(), dport=dns_dport)
+logger.info("ip:{}".format(ip))
+logger.info("udp:{}".format(udp))
 
 # xmax_map 记录最大index
 # {'x0': 1, 'x1': 3, 'x2': 1, 'x3': 1, 'x4': 102, 'x5': 102, 'x6': 102,
 # 'x7': 102, 'x8': 4, 'x9': 103, 'x10': 102, 'x11': 103, 'x12': 102}
 xmax_map = {
-    "x0": len(qr_list)-1,
-    "x1": len(opcode_list)-1,
-    "x2": len(tc_list)-1,
-    "x3": len(rd_list)-1,
+    "x0": len(qr_list) - 1,
+    "x1": len(opcode_list) - 1,
+    "x2": len(tc_list) - 1,
+    "x3": len(rd_list) - 1,
 
-    "x4": len(qdcount_list)-1,
-    "x5": len(ancount_list)-1,
-    "x6": len(nscount_list)-1,
-    "x7": len(arcount_list)-1,
+    "x4": len(qdcount_list) - 1,
+    "x5": len(ancount_list) - 1,
+    "x6": len(nscount_list) - 1,
+    "x7": len(arcount_list) - 1,
 
-    "x8": len(qclass_list)-1,
+    "x8": len(qclass_list) - 1,
 
-    "x9": len(ar_type_list)-1,
-    "x10": len(ar_ttl_list)-1,
-    "x11": len(ar_rclass_list)-1,
-    "x12": len(ar_rdlen_list)-1,
+    "x9": len(ar_type_list) - 1,
+    "x10": len(ar_ttl_list) - 1,
+    "x11": len(ar_rclass_list) - 1,
+    "x12": len(ar_rdlen_list) - 1,
 }
 
-print(xmax_map)
-
+logger.info("xmax_map:{}".format(xmax_map))
 
 def random_index():
     """
@@ -199,7 +217,7 @@ def random_index():
         random.randint(0, xmax_map["x11"]),
         random.randint(0, xmax_map["x12"]),
     )
-    print("随机坐标:", x)
+    logger.info("index:".format(x))
     return x
 
 
@@ -244,15 +262,8 @@ def save_dns_index():
             f.writelines("{}\n".format(index))
     return
 
-# 配置日志文件和日志级别
-logging.basicConfig(
-    filename='dns_log.txt',
-    level=logging.DEBUG,
-    format='%(asctime)s:%(funcName)15s:%(lineno)5s%(levelname)8s:%(name)10s:%(message)s',
-    datefmt='%Y/%m/%d %I:%M:%S'
-)
 
-logger = logging.getLogger('dns_log')
+
 
 def main():
     # try:
@@ -262,7 +273,6 @@ def main():
     # except Exception as e:
     #     print("{}".format(e))
 
+
 if __name__ == '__main__':
     main()
-
-
