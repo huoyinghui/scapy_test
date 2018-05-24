@@ -23,7 +23,6 @@ import logging
 from scapy.all import *
 
 
-
 # 配置日志文件和日志级别
 logging.basicConfig(
     filename='dns_log.txt',
@@ -33,6 +32,7 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger('dns_log')
+
 
 def get_ip(ifname):
     local_ip = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -86,7 +86,8 @@ def make_dns_query(
     ar_rdlen_ele=0
 ):
 
-    logger.debug("make_dns_query:{}".format((qr_ele, opcode_ele, tc_ele, rd_ele, qd_ele, an_ele, ns_ele, ar_ele, qclass_ele, ar_type_ele, ar_ttl_ele, ar_rclass_ele, ar_rdlen_ele)))
+    logger.debug("make_dns_query:{}".format((qr_ele, opcode_ele, tc_ele, rd_ele, qd_ele, an_ele,
+                                             ns_ele, ar_ele, qclass_ele, ar_type_ele, ar_ttl_ele, ar_rclass_ele, ar_rdlen_ele)))
     dns_query = DNS(id=0, qr=qr_ele, opcode=opcode_ele, tc=tc_ele, rd=rd_ele, qdcount=qd_ele, ancount=an_ele,
                     nscount=ns_ele, arcount=ar_ele)
     qtype_list = list(range(0, 255))
@@ -143,7 +144,8 @@ def index_data_table(x0=0, x1=0, x2=0, x3=0, x4=0, x5=0, x6=0, x7=0, x8=0, x9=0,
     logging.info("index:{} :send query:{}".format(index_list, query))
 
 
-client_server = get_ip('knil')
+# client_server = get_ip('knil')
+client_server = "127.0.0.1"
 dns_server = '192.168.43.213'
 dns_dport = 53
 
@@ -156,6 +158,10 @@ qdcount_list = [0, 1, 65535] + make_random()
 ancount_list = [0, 1, 65535] + make_random()
 nscount_list = [0, 1, 65535] + make_random()
 arcount_list = [0, 1, 65535] + make_random()
+logger.info("qdcount_list:{}".format(qdcount_list))
+logger.info("ancount_list:{}".format(ancount_list))
+logger.info("nscount_list:{}".format(nscount_list))
+logger.info("arcount_list:{}".format(arcount_list))
 
 qclass_list = [1, 2, 3, 4, 255]
 
@@ -196,6 +202,7 @@ xmax_map = {
 }
 
 logger.info("xmax_map:{}".format(xmax_map))
+
 
 def random_index():
     """
@@ -261,8 +268,6 @@ def save_dns_index():
         for index in create_index():
             f.writelines("{}\n".format(index))
     return
-
-
 
 
 def main():
