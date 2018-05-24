@@ -208,6 +208,23 @@ def random_dns_send():
     index_data_table(*x)
 
 
+def index_x():
+    for x0 in range(xmax_map.get('x0', 0)):
+        for x1 in range(xmax_map.get('x1', 0)):
+            for x2 in range(xmax_map.get('x2', 0)):
+                for x3 in range(xmax_map.get('x3', 0)):
+                    for x4 in range(xmax_map.get('x4', 0)):
+                        for x5 in range(xmax_map.get('x5', 0)):
+                            for x6 in range(xmax_map.get('x6', 0)):
+                                for x7 in range(xmax_map.get('x7', 0)):
+                                    for x8 in range(xmax_map.get('x8', 0)):
+                                        for x9 in range(xmax_map.get('x9', 0)):
+                                            for x10 in range(xmax_map.get('x10', 0)):
+                                                for x11 in range(xmax_map.get('x11', 0)):
+                                                    for x12 in range(xmax_map.get('x12', 0)):
+                                                        yield x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12
+
+
 def romad_dns():
     i = 0
     while i < 100:
@@ -225,8 +242,9 @@ def create_all_dns_index():
     n.x1, x2, x3, ...x12
     :return:
     """
-    # with open("a.txt", "a+") as f:
-    #     f.writelines("{}\n".format(random_index()))
+    with open("a.txt", "a+") as f:
+        for index in index_x():
+            f.writelines("{}\n".format(index))
     # import sqlite3
     # conn = sqlite3.connect('example.db')
     # c = conn.cursor()
@@ -266,9 +284,11 @@ def do_job():
 
 
 def main():
-    random_dns_send()
-    # create_all_dns_index()
+    # random_dns_send()
+    create_all_dns_index()
     # do_job()
+    # for index in index_x():
+    #     print(index)
     pass
 
 if __name__ == '__main__':
