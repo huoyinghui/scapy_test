@@ -24,7 +24,6 @@ from scapy.all import *
 
 
 def get_ip(ifname):
-    return '17.0.0.1'
     local_ip = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     return socket.inet_ntoa(fcntl.ioctl(local_ip.fileno(), 0x8915, struct.pack('256s', bytes(ifname[:15], 'utf-8')))[20:24])
 
@@ -131,7 +130,7 @@ def index_data_table(x0=0, x1=0, x2=0, x3=0, x4=0, x5=0, x6=0, x7=0, x8=0, x9=0,
     logging.info("index:{} :send query:{}".format(index_list, query))
 
 
-client_server = '17.0.0.1'
+client_server = get_ip('knil')
 dns_server = '192.168.43.213'
 dns_dport = 53
 
