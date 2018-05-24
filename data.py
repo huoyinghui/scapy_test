@@ -266,9 +266,9 @@ def do_job():
 
 
 def main():
-    # random_dns_send()
+    random_dns_send()
     # create_all_dns_index()
-    do_job()
+    # do_job()
     pass
 
 if __name__ == '__main__':
