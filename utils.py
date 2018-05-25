@@ -25,7 +25,7 @@ from scapy.all import *
 
 # 配置日志文件和日志级别
 logging.basicConfig(
-    filename='dns_log.txt',
+    # filename='dns_log.txt',
     level=logging.DEBUG,
     format='%(asctime)s:%(funcName)15s:%(lineno)5s%(levelname)8s:%(name)10s:%(message)s',
     datefmt='%Y/%m/%d %I:%M:%S'
@@ -56,10 +56,11 @@ def make_domain_name():
 def make_random(start=0, end=65535):
     res = []
     for i in range(100):
-        if i > 65535:
-            logger.error("make_random err:{}".format(i))
-            raise ("i:{} > 65535".format(i))
-        res.append(random.randint(start, end))
+        r_data = random.randint(start, end)
+        if r_data > end:
+            logger.error("make_random err:{}".format(r_data))
+            raise ("i:{} > end:{}".format(r_data, end))
+        res.append(r_data)
     return res
 
 
