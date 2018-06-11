@@ -8,7 +8,6 @@ docker run --rm -it -v `pwd`:/tmp  openswitch/ubuntuscapy sh
 ![image](https://raw.githubusercontent.com/tphyhFighting/static/master/img/scapy_docker_run.jpg)
 
 
-
 ####scapy
 ```python
 dns_server = '8.8.8.8'
@@ -387,5 +386,5 @@ Sent 1 packets.
          |  rdlen= 12
  ```
   
-2. hhh
-3. hhh
+#### 修改为async 发送dns 数据
+![image](https://raw.githubusercontent.com/huoyinghui/static/master/dns01.jpg)
