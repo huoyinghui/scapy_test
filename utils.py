@@ -21,20 +21,24 @@ send query:b'E\x00\x00\x80\x00\x01\x00\x00@\x11|\xee\x11\x00\x00\x01\xc0\xa8+\xd
 """
 import logging
 from scapy.all import *
+import asyncio
+from asyncio import coroutine
 
 
 # 配置日志文件和日志级别
 logging.basicConfig(
-    # filename='dns_log.txt',
+    filename='dns_log.txt',
     level=logging.DEBUG,
     format='%(asctime)s:%(funcName)15s:%(lineno)5s%(levelname)8s:%(name)10s:%(message)s',
     datefmt='%Y/%m/%d %I:%M:%S'
 )
 
 logger = logging.getLogger('dns_log')
+# logger.setLevel(logging.DEBUG)
 
 
 def get_ip(ifname):
+    # return '127.0.0.1'
     local_ip = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     return socket.inet_ntoa(fcntl.ioctl(local_ip.fileno(), 0x8915, struct.pack('256s', bytes(ifname[:15], 'utf-8')))[20:24])
 
@@ -115,6 +119,9 @@ def check(*index_list):
     return True
 
 
+# import tornado
+# from tornado.gen import coroutine
+@coroutine
 def index_data_table(x0=0, x1=0, x2=0, x3=0, x4=0, x5=0, x6=0, x7=0, x8=0, x9=0, x10=0, x11=0, x12=0):
     index_list = (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12)
     if not check(*index_list):
@@ -141,13 +148,13 @@ def index_data_table(x0=0, x1=0, x2=0, x3=0, x4=0, x5=0, x6=0, x7=0, x8=0, x9=0,
         ar_ttl_ele=ar_ttl_ele, ar_rclass_ele=ar_rclass_ele,
         ar_rdlen_ele=ar_rdlen_ele,
     )
-    send(query)
+    yield send(query)
     logging.info("index:{} :send query:{}".format(index_list, query))
 
 
 client_server = get_ip('knil')
 # client_server = "127.0.0.1"
-dns_server = '192.168.43.213'
+dns_server = '119.29.29.29'
 dns_dport = 53
 
 qr_list = range(0, 2)
@@ -239,6 +246,7 @@ def create_index():
     生成测试随机组合
     :return:
     """
+    cnt = 0
     for x0 in range(xmax_map.get('x0', 0)):
         for x1 in range(xmax_map.get('x1', 0)):
             for x2 in range(xmax_map.get('x2', 0)):
@@ -252,7 +260,13 @@ def create_index():
                                             for x10 in range(xmax_map.get('x10', 0)):
                                                 for x11 in range(xmax_map.get('x11', 0)):
                                                     for x12 in range(xmax_map.get('x12', 0)):
-                                                        yield x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12
+                                                        cnt += 1
+                                                        # if cnt == 100:
+                                                        #     raise StopIteration
+                                                        # no cnt
+                                                        # yield x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12
+                                                        # with cnt
+                                                        yield cnt, x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12
 
 
 def save_dns_index():
@@ -271,14 +285,28 @@ def save_dns_index():
     return
 
 
-def main():
+def iter_index():
+    """
+    迭代坐标
+    :return:
+    """
+    for index in create_index():
+        logger.debug("{}".format(index))
+        yield index
+
+async def main():
     # try:
     for index in create_index():
-        # logger.debug("{}".format(index))
-        index_data_table(*index)
+        # print(index[1:], index[0], *index[1:])
+        logger.debug("{}".format(index))
+        # index[0] 是计数器时.
+        await index_data_table(*index[1:])
+        # await index_data_table(*index)
+        # if dns ser
+        await asyncio.sleep(0.02)
     # except Exception as e:
     #     print("{}".format(e))
 
-
 if __name__ == '__main__':
-    main()
+    # main()
+    asyncio.get_event_loop().run_until_complete(main())
